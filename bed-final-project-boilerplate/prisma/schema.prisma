@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+generator client {
+  provider = "prisma-client-js"
+}
+model Property {
+  id             String     @id @default(uuid())
+  title          String
+  description    String
+  location       String
+  pricePerNight  Float
+  bedroomCount   Int
+  bathroomCount  Int
+  maxGuestCount  Int
+  rating         Int
+  hostId         String
+  host           Host       @relation(fields:[hostId], references: [id])
+  booking        Booking[]
+  reviews        Review[]
+  amenities      Amenity[]  @relation("PropertyAmenities")
+}
+model Host {
+  id          String     @id @default(uuid())
+  username    String     @unique
+  password    String
+  name        String
+  email       String
+  phoneNumber String
+  pictureUrl  String
+  aboutMe     String
+  listings    Property[]
+}
+model User {
+  id          String @id @default(uuid())
+  username    String @unique
+  password    String
+  name        String
+  email       String
+  phoneNumber String
+  pictureUrl  String
+  bookings    Booking[]
+  reviews     Review[]
+}
+model Booking {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  propertyId      String
+  property        Property @relation(fields: [propertyId], references: [id])
+  checkinDate     DateTime
+  checkoutDate    DateTime
+  numberOfGuests  Int
+  totalPrice      Int
+  bookingStatus   String
+}
+model Review {
+  id            String   @id @default(uuid())
+  rating        Int
+  comment       String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id])
+}
+model Amenity {
+  id          String     @id @default(uuid())
+  name        String
+  properties  Property[] @relation("PropertyAmenities")
+}
